@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A Little Wish</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href=https://docs.google.com/spreadsheets/d/1YUy-qprDMYx3IKRnRvdTOho7ZiHn_twFR7XzfZC9STM/edit?usp=sharing" rel="stylesheet">
+<style>
+  :root{
+    --bg-top: #FFE9F0;
+    --bg-bottom: #FFF3E2;
+    --ink: #3E1F32;
+    --pink: #FF6FA5;
+    --pink-deep: #E84D8A;
+    --gold: #FFC24B;
+    --card: #FFFDF9;
+    --line: #F4D8E4;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-family:'Nunito', sans-serif;
+    color:var(--ink);
+    background:
+      radial-gradient(circle at 15% 20%, #FFD7E6 0%, transparent 40%),
+      radial-gradient(circle at 85% 80%, #FFE3B3 0%, transparent 40%),
+      linear-gradient(180deg, var(--bg-top), var(--bg-bottom));
+    overflow:hidden;
+    position:relative;
+    padding:24px;
+  }
+
+  .card{
+    position:relative;
+    background:var(--card);
+    border-radius:28px;
+    padding:48px 40px;
+    width:100%;
+    max-width:460px;
+    text-align:center;
+    box-shadow: 0 20px 60px rgba(232,77,138,0.18), 0 2px 0 var(--line) inset;
+    border: 1px solid var(--line);
+  }
+
+  .eyebrow{
+    font-family:'Fredoka', sans-serif;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    font-size:12px;
+    color:var(--pink-deep);
+    font-weight:600;
+    margin-bottom:10px;
+  }
+
+  h1{
+    font-family:'Fredoka', sans-serif;
+    font-weight:700;
+    font-size:28px;
+    line-height:1.3;
+    margin:0 0 22px;
+  }
+
+  .stage{ display:none; }
+  .stage.active{ display:block; animation: rise 0.5s ease; }
+
+  @keyframes rise{
+    from{ opacity:0; transform: translateY(14px); }
+    to{ opacity:1; transform: translateY(0); }
+  }
+
+  input[type="text"], input[type="date"]{
+    width:100%;
+    padding:14px 16px;
+    border-radius:14px;
+    border:2px solid var(--line);
+    font-family:'Nunito', sans-serif;
+    font-size:16px;
+    font-weight:600;
+    color:var(--ink);
+    background:#fff;
+    outline:none;
+    transition: border-color 0.2s;
+  }
+  input[type="text"]:focus, input[type="date"]:focus{ border-color: var(--pink); }
+
+  .field-label{
+    display:block;
+    text-align:left;
+    font-size:12px;
+    font-weight:700;
+    color:#9B6B84;
+    margin:16px 2px 6px;
+  }
+
+  .go-btn{
+    margin-top:18px;
+    background: linear-gradient(135deg, var(--pink), var(--pink-deep));
+    color:#fff;
+    border:none;
+    padding:14px 30px;
+    border-radius:999px;
+    font-family:'Fredoka', sans-serif;
+    font-weight:600;
+    font-size:16px;
+    cursor:pointer;
+    box-shadow: 0 8px 20px rgba(232,77,138,0.35);
+    transition: transform 0.15s ease;
+  }
+  .go-btn:hover{ transform: translateY(-2px); }
+  .go-btn:disabled{ opacity:0.5; cursor:not-allowed; }
+
+  .btn-row{
+    display:flex;
+    gap:16px;
+    justify-content:center;
+    margin-top:8px;
+    position:relative;
+    min-height:60px;
+  }
+
+  .yes-btn, .no-btn{
+    font-family:'Fredoka', sans-serif;
+    font-weight:600;
+    font-size:16px;
+    padding:14px 28px;
+    border-radius:999px;
+    border:none;
+    cursor:pointer;
+  }
+  .yes-btn{
+    background: linear-gradient(135deg, var(--pink), var(--pink-deep));
+    color:#fff;
+    box-shadow: 0 8px 20px rgba(232,77,138,0.35);
+    transition: transform 0.15s ease, font-size 0.2s ease, padding 0.2s ease;
+  }
+  .yes-btn:hover{ transform: translateY(-2px) scale(1.04); }
+
+  .no-btn{
+    background:#fff;
+    color:var(--pink-deep);
+    border:2px solid var(--line);
+    position:relative;
+    transition: transform 0.12s ease;
+  }
+
+  #noWrap{
+    position:relative;
+  }
+  #noWrap.escaping .no-btn{
+    position:fixed;
+  }
+
+  .taunt{
+    margin-top:14px;
+    font-size:13px;
+    color:#9B6B84;
+    min-height:18px;
+    font-weight:600;
+  }
+
+  /* Yes stage */
+  .wish-emoji{ font-size:46px; margin-bottom:6px; }
+  .wish-name{
+    font-family:'Fredoka', sans-serif;
+    font-weight:700;
+    color: var(--pink-deep);
+  }
+  .date-line{
+    margin-top:16px;
+    font-size:14px;
+    color:#9B6B84;
+    font-weight:700;
+    letter-spacing:0.02em;
+  }
+  .again-btn{
+    margin-top:24px;
+    background:none;
+    border:none;
+    color:var(--pink-deep);
+    font-family:'Nunito', sans-serif;
+    font-weight:800;
+    font-size:13px;
+    text-decoration:underline;
+    cursor:pointer;
+  }
+
+  .avatar-wrap{
+    width:120px;
+    height:120px;
+    margin:0 auto 14px;
+    border-radius:50%;
+    background: linear-gradient(135deg, #FFE3EC, #FFEBC6);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    box-shadow: 0 10px 24px rgba(232,77,138,0.25);
+    animation: pop-bounce 0.7s cubic-bezier(.36,1.5,.64,1);
+    overflow:hidden;
+  }
+  .avatar-wrap img{
+    width:100%;
+    height:100%;
+  }
+  @keyframes pop-bounce{
+    0%{ transform: scale(0); opacity:0; }
+    60%{ transform: scale(1.12); opacity:1; }
+    100%{ transform: scale(1); }
+  }
+
+  .age-pill{
+    display:inline-block;
+    background: var(--gold);
+    color:#4A2A00;
+    font-family:'Fredoka', sans-serif;
+    font-weight:600;
+    font-size:12px;
+    padding:5px 14px;
+    border-radius:999px;
+    margin-bottom:14px;
+    animation: rise 0.6s ease 0.15s backwards;
+  }
+
+  .wish-actions{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    margin-top:22px;
+  }
+
+  .stage-btn{
+    font-family:'Fredoka', sans-serif;
+    font-weight:600;
+    font-size:15px;
+    padding:13px 20px;
+    border-radius:999px;
+    border:2px solid var(--pink);
+    background:#fff;
+    color:var(--pink-deep);
+    cursor:pointer;
+    transition: transform 0.15s ease, background 0.2s ease;
+  }
+  .stage-btn:hover{ transform: translateY(-2px); background: #FFF1F6; }
+  .stage-btn.primary{
+    background: linear-gradient(135deg, var(--pink), var(--pink-deep));
+    color:#fff;
+    border:none;
+    box-shadow: 0 8px 20px rgba(232,77,138,0.35);
+  }
+
+  textarea{
+    width:100%;
+    min-height:110px;
+    padding:14px 16px;
+    border-radius:14px;
+    border:2px solid var(--line);
+    font-family:'Nunito', sans-serif;
+    font-size:15px;
+    font-weight:600;
+    color:var(--ink);
+    resize:vertical;
+    outline:none;
+    transition: border-color 0.2s;
+  }
+  textarea:focus{ border-color: var(--pink); }
+
+  .send-status{
+    margin-top:10px;
+    font-size:12px;
+    font-weight:700;
+    color:#9B6B84;
+    min-height:16px;
+  }
+
+  .surprise-box{
+    margin-top:18px;
+    border-radius:18px;
+    overflow:hidden;
+    border:2px dashed var(--line);
+    max-height:0;
+    opacity:0;
+    transition: max-height 0.5s ease, opacity 0.5s ease;
+  }
+  .surprise-box.open{
+    max-height:340px;
+    opacity:1;
+  }
+  .surprise-box img{
+    width:100%;
+    display:block;
+    animation: pop-bounce 0.6s cubic-bezier(.36,1.5,.64,1);
+  }
+
+  .confetti{
+    position:fixed;
+    top:-10px;
+    width:8px;
+    height:14px;
+    border-radius:2px;
+    opacity:0.9;
+    pointer-events:none;
+    animation: fall linear forwards;
+  }
+  @keyframes fall{
+    to{ transform: translateY(110vh) rotate(400deg); opacity:0.3; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="card">
+
+    <!-- Stage 1: enter name -->
+    <div class="stage active" id="stageName">
+      <div class="eyebrow">A little something for you</div>
+      <h1>What's your name?</h1>
+      <input type="text" id="nameInput" placeholder="Type your name..." maxlength="30">
+      <br>
+      <label for="dobInput" class="field-label">Your birth date</label>
+      <input type="date" id="dobInput">
+      <br>
+      <button class="go-btn" id="nameSubmit">Continue</button>
+    </div>
+
+    <!-- Stage 2: yes/no question -->
+    <div class="stage" id="stageQuestion">
+      <div class="eyebrow" id="hiName">Hi there</div>
+      <h1>Do you want your wish 🎁</h1>
+      <div class="btn-row">
+        <button class="yes-btn" id="yesBtn">Yes!</button>
+        <div id="noWrap">
+          <button class="no-btn" id="noBtn">No</button>
+        </div>
+      </div>
+      <div class="taunt" id="taunt"></div>
+    </div>
+
+    <!-- Stage 3: wish -->
+    <div class="stage" id="stageWish">
+      <div class="avatar-wrap"><img id="avatarImg" src="" alt="avatar"></div>
+      <div class="age-pill" id="agePill"></div>
+      <h1>Happy Wishes, <span class="wish-name" id="wishName"></span>!</h1>
+      <p>Hope your day is full of good moments, good people, and good luck — you deserve it.</p>
+      <div class="date-line" id="wishDob"></div>
+      <div class="date-line" id="wishDate"></div>
+
+      <div class="wish-actions">
+        <button class="stage-btn primary" id="toWriteWishBtn">Write your wish 💌</button>
+      </div>
+    </div>
+
+    <!-- Stage 4: write your own wish -->
+    <div class="stage" id="stageWriteWish">
+      <div class="eyebrow">Your turn</div>
+      <h1>What's your wish, <span class="wish-name" id="writeWishName"></span>?</h1>
+      <textarea id="wishTextInput" placeholder="Type what you're wishing for this year..."></textarea>
+      <br>
+      <button class="stage-btn primary" id="submitWishBtn">Send my wish</button>
+      <div class="send-status" id="sendStatus"></div>
+    </div>
+
+    <!-- Stage 5: surprise -->
+    <div class="stage" id="stageSurprise">
+      <div class="eyebrow">One more thing</div>
+      <h1>Got a surprise for you 🎁</h1>
+      <p>Go on, tap the button.</p>
+      <button class="stage-btn primary" id="revealSurpriseBtn">Reveal surprise</button>
+      <div class="surprise-box" id="surpriseBox">
+        <img id="surpriseImg" src="" alt="surprise">
+      </div>
+      <br>
+      <button class="again-btn" id="againBtn">Send another wish</button>
+    </div>
+
+  </div>
+
+<script>
+  const stageName = document.getElementById('stageName');
+  const stageQuestion = document.getElementById('stageQuestion');
+  const stageWish = document.getElementById('stageWish');
+  const stageWriteWish = document.getElementById('stageWriteWish');
+  const stageSurprise = document.getElementById('stageSurprise');
+
+  const nameInput = document.getElementById('nameInput');
+  const dobInput = document.getElementById('dobInput');
+  const nameSubmit = document.getElementById('nameSubmit');
+  const hiName = document.getElementById('hiName');
+
+  const yesBtn = document.getElementById('yesBtn');
+  const noBtn = document.getElementById('noBtn');
+  const noWrap = document.getElementById('noWrap');
+  const taunt = document.getElementById('taunt');
+
+  const avatarImg = document.getElementById('avatarImg');
+  const agePill = document.getElementById('agePill');
+  const wishName = document.getElementById('wishName');
+  const wishDob = document.getElementById('wishDob');
+  const wishDate = document.getElementById('wishDate');
+  const toWriteWishBtn = document.getElementById('toWriteWishBtn');
+
+  const writeWishName = document.getElementById('writeWishName');
+  const wishTextInput = document.getElementById('wishTextInput');
+  const submitWishBtn = document.getElementById('submitWishBtn');
+  const sendStatus = document.getElementById('sendStatus');
+
+  const revealSurpriseBtn = document.getElementById('revealSurpriseBtn');
+  const surpriseBox = document.getElementById('surpriseBox');
+  const surpriseImg = document.getElementById('surpriseImg');
+  const againBtn = document.getElementById('againBtn');
+
+  // 👉 Replace this with your own Google Apps Script Web App URL
+  // (Extensions > Apps Script in your Google Sheet, deploy as Web App, paste the URL here)
+  const GOOGLE_SHEET_URL = 'PASTE_YOUR_GOOGLE_APPS_SCRIPT_URL_HERE';
+
+  let friendName = '';
+  let friendDob = '';
+  let dodgeCount = 0;
+
+  const taunts = [
+    "Nice try 😄",
+    "Not so fast!",
+    "The 'No' button is shy today",
+    "Come on, just say yes 🥺",
+    "It's getting away from you...",
+    "Almost had it!",
+    "Yes is right there, promise 👉"
+  ];
+
+  function calcAge(dobStr){
+    const dob = new Date(dobStr + 'T00:00:00');
+    const today = new Date();
+    let age = today.getFullYear() - dob.getFullYear();
+    const m = today.getMonth() - dob.getMonth();
+    if(m < 0 || (m === 0 && today.getDate() < dob.getDate())){
+      age--;
+    }
+    return age;
+  }
+
+  function goToQuestion(){
+    friendName = nameInput.value.trim() || 'Friend';
+    friendDob = dobInput.value;
+    hiName.textContent = 'Hi ' + friendName;
+    stageName.classList.remove('active');
+    stageQuestion.classList.add('active');
+  }
+
+  nameSubmit.addEventListener('click', goToQuestion);
+  nameInput.addEventListener('keydown', (e) => {
+    if(e.key === 'Enter') goToQuestion();
+  });
+
+  function growYes(){
+    const current = parseFloat(getComputedStyle(yesBtn).fontSize);
+    yesBtn.style.fontSize = Math.min(current + 2, 30) + 'px';
+    yesBtn.style.padding = (14 + dodgeCount) + 'px ' + (28 + dodgeCount * 2) + 'px';
+  }
+
+  function dodgeNo(){
+    dodgeCount++;
+    growYes();
+    taunt.textContent = taunts[Math.min(dodgeCount - 1, taunts.length - 1)];
+
+    // switch to fixed positioning so it can roam the whole viewport
+    noWrap.classList.add('escaping');
+    const btnW = noBtn.offsetWidth;
+    const btnH = noBtn.offsetHeight;
+    const margin = 20;
+    const maxX = window.innerWidth - btnW - margin;
+    const maxY = window.innerHeight - btnH - margin;
+    const randX = Math.max(margin, Math.random() * maxX);
+    const randY = Math.max(margin, Math.random() * maxY);
+    noBtn.style.left = randX + 'px';
+    noBtn.style.top = randY + 'px';
+
+    // shrink it slightly too, extra cheeky after a few tries
+    if(dodgeCount > 4){
+      const scale = Math.max(0.55, 1 - (dodgeCount - 4) * 0.07);
+      noBtn.style.transform = 'scale(' + scale + ')';
+    }
+  }
+
+  noBtn.addEventListener('mouseenter', dodgeNo);
+  noBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    dodgeNo();
+  });
+  // touch support for mobile
+  noBtn.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    dodgeNo();
+  });
+
+  function launchConfetti(){
+    const colors = ['#FF6FA5', '#FFC24B', '#E84D8A', '#7FD8BE', '#FFE9F0'];
+    for(let i = 0; i < 60; i++){
+      const piece = document.createElement('div');
+      piece.className = 'confetti';
+      piece.style.left = Math.random() * 100 + 'vw';
+      piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+      piece.style.animationDuration = (2.5 + Math.random() * 2) + 's';
+      piece.style.animationDelay = (Math.random() * 0.6) + 's';
+      document.body.appendChild(piece);
+      setTimeout(() => piece.remove(), 5000);
+    }
+  }
+
+  yesBtn.addEventListener('click', () => {
+    wishName.textContent = friendName;
+    writeWishName.textContent = friendName;
+    avatarImg.src = 'https://api.dicebear.com/7.x/adventurer/svg?seed=' + encodeURIComponent(friendName) + '&backgroundColor=ffe3ec,ffe3b3,ffd5e5';
+
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+
+    if(friendDob){
+      const dobDate = new Date(friendDob + 'T00:00:00');
+      wishDob.textContent = 'Born on ' + dobDate.toLocaleDateString('en-US', options);
+      wishDob.style.display = 'block';
+      agePill.textContent = calcAge(friendDob) + ' years young 🎂';
+      agePill.style.display = 'inline-block';
+    } else {
+      wishDob.textContent = '';
+      wishDob.style.display = 'none';
+      agePill.style.display = 'none';
+    }
+
+    const today = new Date();
+    wishDate.textContent = 'Wished on ' + today.toLocaleDateString('en-US', options);
+
+    stageQuestion.classList.remove('active');
+    stageWish.classList.add('active');
+    launchConfetti();
+  });
+
+  toWriteWishBtn.addEventListener('click', () => {
+    stageWish.classList.remove('active');
+    stageWriteWish.classList.add('active');
+  });
+
+  submitWishBtn.addEventListener('click', async () => {
+    const wishText = wishTextInput.value.trim();
+    if(!wishText){
+      sendStatus.textContent = 'Type something first 🙂';
+      return;
+    }
+
+    sendStatus.textContent = 'Sending...';
+    submitWishBtn.disabled = true;
+
+    try{
+      if(GOOGLE_SHEET_URL && GOOGLE_SHEET_URL.indexOf('PASTE_YOUR') === -1){
+        await fetch(GOOGLE_SHEET_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: friendName,
+            dob: friendDob,
+            wish: wishText,
+            sentAt: new Date().toISOString()
+          })
+        });
+      }
+      sendStatus.textContent = 'Wish sent! 💌';
+    } catch(err){
+      sendStatus.textContent = "Couldn't send, but here's your surprise anyway!";
+    }
+
+    submitWishBtn.disabled = false;
+
+    setTimeout(() => {
+      stageWriteWish.classList.remove('active');
+      stageSurprise.classList.add('active');
+    }, 700);
+  });
+
+  revealSurpriseBtn.addEventListener('click', () => {
+    // temporary placeholder image — swap this for your own photo/gif later
+    surpriseImg.src = 'https://picsum.photos/seed/' + encodeURIComponent(friendName + Date.now()) + '/440/300';
+    surpriseBox.classList.add('open');
+    revealSurpriseBtn.disabled = true;
+    launchConfetti();
+  });
+
+  againBtn.addEventListener('click', () => {
+    stageSurprise.classList.remove('active');
+    stageName.classList.add('active');
+    nameInput.value = '';
+    dobInput.value = '';
+    wishTextInput.value = '';
+    sendStatus.textContent = '';
+    surpriseBox.classList.remove('open');
+    revealSurpriseBtn.disabled = false;
+    dodgeCount = 0;
+    yesBtn.style.fontSize = '16px';
+    yesBtn.style.padding = '14px 28px';
+    noWrap.classList.remove('escaping');
+    noBtn.style.left = '';
+    noBtn.style.top = '';
+    noBtn.style.transform = '';
+    taunt.textContent = '';
+  });
+
+</script>
+
+</body>
+</html>
